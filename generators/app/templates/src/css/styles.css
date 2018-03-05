@@ -1,3 +1,0 @@
-@import '@snapk/web-style-library';
-
-.component-<%= componentName.kebabCase %> {}

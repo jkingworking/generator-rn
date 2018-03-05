@@ -1,9 +1,0 @@
-.idea
-.nyc_output
-coverage
-docs
-node_modules
-npm-debug.log
-server.js
-src
-tests
