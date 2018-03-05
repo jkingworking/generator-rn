@@ -1,6 +1,6 @@
 {
-  "name": "<%= componentName.kebabCase %>",
+  "name": "<%= componentName.pascalCase %>",
   "version": "1.0.0",
   "private": true,
-  "main": "./<%= componentName.kebabCase %>.js"
+  "main": "./<%= componentName.pascalCase %>.js"
 }

@@ -70,10 +70,6 @@ module.exports = class extends Yeoman {
 		};
 	}
 
-	echo() {
-		this.log(JSON.stringify(this.props));
-  }
-
   write() {
     const { actionName, asyncAction, createReducer } = this.props;
 
@@ -170,102 +166,4 @@ module.exports = class extends Yeoman {
     );
     this.fs.write(destinationFilePath, updatedFile);
   }
-
-  _writing() {
-		let packagePath = this.destinationPath('./package.json');
-		let packageData = require(packagePath);
-		let constantPrefix = packageData.constantPrefix;
-		let actionsIndexFilePath = this.destinationPath('./src/actions/index.js');
-		let actionsIndexFile = this.fs.read(actionsIndexFilePath);
-		let constFilePath = this.destinationPath('./src/constants/index.js');
-		let constFile = this.fs.read(constFilePath);
-		let yeomanConstantListHook = '/* =- yoemanHook:constantList -= */';
-
-		const { asyncAction, actionName } = this.props;
-
-		// Verify this const name is unique
-		if (constFile.indexOf(actionName.const) !== -1 ||
-			constFile.indexOf(actionName.const + '_ERROR') !== -1 ||
-			constFile.indexOf(actionName.const + '_STATUS') !== -1) {
-			throw('Sorry, the const "' + actionName.const + '" already exists.');
-		}
-
-		// Add this action to the const file.
-		constFile = updateConstFile(constFile, actionName.const, constantPrefix);
-
-		// If this is an asyn action
-		if (asyncAction) {
-			constFile = updateConstFile(constFile, actionName.const + '_ERROR', constantPrefix);
-			constFile = updateConstFile(constFile, actionName.const + '_STATUS', constantPrefix);
-
-			// if this service doesn't have ASYNC_STATUSES add them
-			if (constFile.indexOf('ASYNC_STATUSES') === -1) {
-				constFile = 'export const ASYNC_STATUSES = { DEFAULT: \'DEFAULT\', ERROR: \'ERROR\', SUCCESS: \'SUCCESS\', IN_PROGRESS: \'IN_PROGRESS\' };\n' + constFile;
-			}
-		}
-
-		// Save the new const
-		this.fs.write(constFilePath, constFile);
-
-		let template = (asyncAction) ? 'action-async.js' : 'action.js';
-		let templateData = {
-			...this.props,
-			actionName,
-			constantPrefix,
-			constantName: constantPrefix.substr(0, constantPrefix.length - 1),
-		};
-
-		// Copy over the correct action template
-		this.fs.copyTpl(
-			this.templatePath(template),
-			this.destinationPath('./src/actions/' + actionName.kebabCase + '.js'),
-			templateData
-		);
-
-		// Write the action into the actions index file as an export so it can be consumed.
-		actionsIndexFile = `export ${templateData.actionName.camelCase} from './${templateData.actionName.kebabCase}';\n${actionsIndexFile}`;
-		this.fs.write(actionsIndexFilePath, actionsIndexFile);
-
-		// Copy the reducer if that's needed
-		if (this.props.createReducer) {
-			let createReducerFilePath = this.destinationPath('./src/reducers/index.js');
-			let createReducerFile = this.fs.read(createReducerFilePath);
-
-			// Copy the reducer file
-			this.fs.copyTpl(
-				this.templatePath('./reducer.js'),
-				this.destinationPath('./src/reducers/' + actionName.kebabCase + '.js'),
-				templateData
-			);
-
-			// Adds the reducer import statement
-			createReducerFile = updateReducerFile(createReducerFile, actionName, constantPrefix);
-
-			if (asyncAction) {
-				// Copy the reducer status file
-				let statusActionName = createNames(actionName.camelCase + 'Status');
-				this.fs.copyTpl(
-					this.templatePath('./reducer-status.js'),
-					this.destinationPath('./src/reducers/' + actionName.kebabCase + '-status.js'),
-					Object.assign({}, templateData, { actionName: statusActionName })
-				);
-				createReducerFile = updateReducerFile(createReducerFile, statusActionName, constantPrefix);
-
-				let errorActionName = createNames(actionName.camelCase + 'Error');
-				// Create and error reducer file when needed
-				this.fs.copyTpl(
-					this.templatePath('./reducer.js'),
-					this.destinationPath('./src/reducers/' + actionName.kebabCase + '-error.js'),
-					Object.assign({}, templateData, { actionName: errorActionName, reducerValue: "''" })
-				);
-
-				// Adds the reducer import statement
-				createReducerFile = updateReducerFile(createReducerFile, errorActionName, constantPrefix);
-			}
-
-			this.fs.write(createReducerFilePath, createReducerFile);
-		}
-
-	}
-
 };

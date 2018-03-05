@@ -1,99 +1,89 @@
-let yeoman = require('yeoman-generator');
-let chalk = require('chalk');
-let yosay = require('yosay');
-let camelCase = require('lodash.camelcase');
-let snakeCase = require('lodash.snakecase');
-let kebabCase = require('lodash.kebabcase');
-let upperFirst = require('lodash.upperfirst');
+const Yeoman = require('yeoman-generator');
+const chalk = require('chalk');
+const yosay = require('yosay');
+const createNames = require('../../shared-helpers/create-names');
+const fs = require('fs');
+const { camelCase } = require('lodash');
 
-module.exports = yeoman.Base.extend({
-	prompting: async function () {
-		// Have Yeoman greet the user.
-		this.log(yosay(
-			chalk.red('generator-web-component') + ' react component generator',
-		));
+module.exports = class extends Yeoman {
+  constructor(args, opts) {
+    // Calling the super constructor is important so our generator is correctly set up
+    super(args, opts);
 
-		let prompts = [ {
-			type: 'input',
-			name: 'componentName',
-			message: 'Name this component:',
-		}, {
-			type: 'confirm',
-			name: 'statelessComponent',
-			message: 'Will this be a stateless component?',
-			default: true,
-		}, {
-			type: 'confirm',
-			name: 'connectToRedux',
-			message: 'Connect this component to redux?',
-			default: false,
-		} ];
+    this.option('babel'); // This method adds support for a `--babel` flag
+  }
 
-		const props = await this.prompt(prompts);
+  async prompting() {
+    // Have Yeoman greet the user.
+    this.log(yosay(`Welcome to the ${chalk.red('React Native')} component generator`));
 
-		// To access props later use this.props.someAnswer;
-		return this.props = {
-			...props,
-			componentName: createNames(props.componentName),
-		}
-	},
+    // Prompt for the component name it's awaited because we need it in the next step
+    const componentAnswers = await this.prompt([{
+      type: 'input',
+      name: 'componentName',
+      message: 'Name this component:',
+      validate: componentName => !!componentName
+    }]);
 
-	writing: function () {
-		const { statelessComponent, componentName: {kebabCase} } = this.props;
-		const templateData = this.props;
-		const template = statelessComponent
-			? './.component.stateless.js'
-			: './.component.js';
+    const componentName = createNames()(componentAnswers.componentName);
 
-		// Make sure a component with that name doesn't exist
-		if (this.fs.exists(this.destinationPath('./src/components/' + kebabCase + '/package.json'))) {
-			throw('A component named "' + kebabCase + '" already exists.');
-		}
+    const hasCollision = this._doesComponentExist(componentName);
 
-		// Copy over the correct component template
-		this.fs.copyTpl(
-			this.templatePath(template),
-			this.destinationPath('./src/components/' + kebabCase + '/' + kebabCase + '.js'),
-			templateData,
-		);
+    if (hasCollision) {
+      this.log(chalk.red(`\n*Error: a component named '${componentName.pascalCase}' already exists.\n`));
+    }
 
-		// Copy the component test file
-		this.fs.copyTpl(
-			this.templatePath('./.test.js'),
-			this.destinationPath('./src/components/' + kebabCase + '/' + kebabCase + '.test.js'),
-			templateData,
-		);
+    const promptAnswers = hasCollision
+      ? {
+        pureComponent: false,
+        connectToRedux: false,
+        componentProps: ''
+      }
+      : await this.prompt([{
+        type: 'confirm',
+        name: 'pureComponent',
+        message: 'Will this be a pure component?',
+        default: true
+      }, {
+        type: 'confirm',
+        name: 'connectToRedux',
+        message: 'Connect this component to redux?',
+        default: false
+      }, {
+        type: 'input',
+        name: 'componentProps',
+        message: `Initial component props (',' or ' ' separated) ${chalk.gray(`\nAll propTypes will be set as 'string'\n`)}:`
+      }]);
 
-		// Copy the package and css files
-		this.fs.copyTpl(
-			this.templatePath('./**/*.{js,json,css}'),
-			this.destinationPath('./src/components/' + kebabCase + '/'),
-			templateData,
-		);
-	},
-});
+    // To access props later use this.props;
+    this.props = {
+      ...promptAnswers,
+      componentName,
+      componentProps: promptAnswers.componentProps
+	      .replace(',', ' ')
+	      .split(' ')
+	      .filter(Boolean)
+	      .map(prop => camelCase(prop).trim()),
+      hasCollision
+    };
+  }
 
-function createNames (name) {
-	name = name.trim();
-	return {
-		camelCase: setCase(name, 'camelCase'),
-		kebabCase: setCase(name, 'kebabCase'),
-		kebabCapCase: setCase(name, 'kebabCapCase'),
-		pascalCase: setCase(name, 'pascalCase'),
+  writing() {
+    const { componentName, hasCollision } = this.props;
+    if (hasCollision) { return; }
+    const folder = componentName.pascalCase;
+
+    fs.readdir(this.templatePath('./'), (err, items) => err || items
+	    .filter(item => item.substr(0, 1) !== '.')
+	    .map(item => this.fs.copyTpl(
+	      this.templatePath(item),
+	      this.destinationPath(`./src/components/${folder}/${item.replace('component', componentName.pascalCase)}`),
+	      this.props,
+	    )));
+  }
+
+	_doesComponentExist(componentName) {
+	  const componentFolder = this.destinationPath(`./src/components/${componentName.dirPath}/package.json`);
+	  return this.fs.exists(componentFolder);
 	}
-}
-
-function setCase (input, userCase) {
-	switch (userCase) {
-		case 'const' :
-			return snakeCase(input).toUpperCase();
-		case 'camelCase' :
-			return camelCase(input);
-		case 'kebabCase' :
-			return kebabCase(input);
-		case 'kebabCapCase' :
-			return upperFirst(kebabCase(input));
-		case 'pascalCase' :
-			return upperFirst(camelCase(input));
-	}
-}
+};
