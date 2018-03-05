@@ -1,0 +1,9 @@
+{
+  "generator-node": {
+    "promptValues": {
+      "authorName": "Jonathan King",
+      "authorEmail": "jonathan@jkingworking.com",
+      "authorUrl": ""
+    }
+  }
+}

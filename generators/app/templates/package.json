@@ -1,0 +1,71 @@
+{
+  "name": "@snapk/<%= componentName.packageName %>",
+  "version": "0.0.0",
+  "main": "<%= npmMain %>",
+  "constantPrefix": "<%= componentName.constCase %>_",
+  "style": "./lib/styles.css",
+  "scripts": <%- npmScripts %>,
+  "pre-commit": [
+    "test",
+    "build"
+  ],
+  "keywords": [],
+  "author": "Snap Kitchen",
+  "license": "ISC",
+  "babel": {
+    "presets": [
+      <%- babelPresets %>
+    ],
+    "env": {
+      "test": {
+        "plugins": [
+          "rewire"
+        ]
+      }
+    },
+    "plugins": [
+      <%- babelPlugins %>
+    ]
+  },
+  "eslintConfig": {
+    "parser": "babel-eslint",
+    "extends": "airbnb",
+    "globals": {
+      "__DEV__": true
+    },
+    "env": {
+      "browser": true
+    },
+    "rules": {
+      "no-confusing-arrow": 0,
+      "react/jsx-quotes": 0,
+      "jsx-quotes": [
+        2,
+        "prefer-double"
+      ]
+    }
+  },
+  "happiness": {
+    "parser": "babel-eslint",
+    "ignore": "src/**/*.test.js"
+  },
+  "nyc": {
+    "include": [
+      "src/**/*.js"
+    ]
+  },
+  "dependencies": <%- npmDependencies %>,
+  "devDependencies": <%- npmDevDependencies %>,
+  "description": "<%= componentDescription %>",
+  "directories": {
+    "test": "tests"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/Snapkitchen/<%= componentRepoName %>.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Snapkitchen/<%= componentRepoName %>/issues"
+  },
+  "homepage": "https://github.com/Snapkitchen/<%= componentRepoName %>#readme"
+}
