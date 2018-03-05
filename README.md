@@ -7,6 +7,7 @@ First, install [Yeoman](http://yeoman.io) and @snapk/generator-web-component usi
 
 ```bash
 npm install -g yo
+npm install -g @jking/generator-rn
 ```
 
 ### Then generate a new component:
