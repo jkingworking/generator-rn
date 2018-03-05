@@ -1,4 +1,4 @@
-# @snapk/generator-web-component 
+# @jking/generator-rn 
 > A tool to quickly scaffold out a web-component- for snap kitchen
 
 ## Installation
@@ -7,13 +7,18 @@ First, install [Yeoman](http://yeoman.io) and @snapk/generator-web-component usi
 
 ```bash
 npm install -g yo
-npm install -g @snapk/generator-web-component
 ```
 
-Then generate your new component:
+### Then generate a new component:
 
 ```bash
-yo @snapk/web-component
+yo @jking/rn:component
+```
+
+### Then generate a new action / reducer pair:
+
+```bash
+yo @jking/rn:action
 ```
 
 ## Getting To Know Yeoman

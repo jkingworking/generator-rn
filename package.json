@@ -1,5 +1,5 @@
 {
-  "name": "generator-rn",
+  "name": "@jking/generator-rn",
   "version": "1.0.0",
   "description": "A tool to quickly scaffold out a actions and components for react native apps",
   "author": {
