@@ -7,7 +7,7 @@ const {
 } = require('lodash');
 
 module.exports = function createNames(ACTION_PREFIXES) {
-  return function createNamesConfigured(name, removePrefix) {
+  return function createNamesConfigured(name, removePrefix = false) {
     const nameCleaned = name.trim();
     const camelCaseName = camelCase(nameCleaned);
     const kebabCaseName = kebabCase(nameCleaned);

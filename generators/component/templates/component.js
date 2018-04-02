@@ -11,20 +11,20 @@ const s = StyleSheet.create(componentStyles);
 
 class <%= componentName.pascalCase %> extends <%= pureComponent ? 'PureComponent' : 'Component' %> {
   static propTypes = {
-    <%= ['styles', ...componentProps].map(prop => `${prop}: PropTypes.string,`).join('\n    ') %>
+    <%= ['style', ...componentProps].map(prop => `${prop}: PropTypes.any,`).join('\n    ') %>
   };
 
   static defaultProps = {
-    <%- ['styles', ...componentProps].map(prop => `${prop}: '',`).join('\n    ') %>
+    <%- ['style', ...componentProps].map(prop => `${prop}: '',`).join('\n    ') %>
   };
 <% if(!pureComponent){ %>
   state = {};
 <% } %>
   render() {
-    const { <%= ['styles', ...componentProps].join(', ') %> } = this.props;
+    const { <%= ['style', ...componentProps].join(', ') %> } = this.props;
 
     return (
-      <View style={[styles, s.component<%= componentName.pascalCase %>]}>
+      <View style={[style, s.component<%= componentName.pascalCase %>]}>
       </View>
     );
   }

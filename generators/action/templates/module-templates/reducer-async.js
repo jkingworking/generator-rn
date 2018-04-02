@@ -1,38 +1,33 @@
-import { <%= actionName.const %>, ASYNC_STATUSES, RESET_APP } from 'src/constants';
-
-const { DEFAULT, IN_PROGRESS, ERROR, SUCCESS } = ASYNC_STATUSES;
-
-const defaultValue = {
+const <%= actionName.reducerName %>Default = {
   error: null,
-  payload: <%- reducerValue %>,
-  status: DEFAULT,
+  payload: <%- reducerValue || 'false' %>,
+  status: ASYNC_STATUSES.DEFAULT,
 };
 
-export default function <%= actionName.camelCase %>Reducer (state = defaultValue, action) {
+function <%= actionName.reducerName %> (state = <%= actionName.reducerName %>Default, action) {
   switch (action.type) {
     case <%= actionName.const %>.IN_PROGRESS:
       return {
         ...state,
-        status: IN_PROGRESS,
+        status: ASYNC_STATUSES.IN_PROGRESS,
       };
     case <%= actionName.const %>.ERROR:
       return {
         ...state,
         error: action.error,
         payload: null,
-        status: ERROR,
+        status: ASYNC_STATUSES.ERROR,
       };
     case <%= actionName.const %>.SUCCESS:
       return {
         ...state,
         error: null,
         payload: action.payload,
-        status: SUCCESS,
+        status: ASYNC_STATUSES.SUCCESS,
       };
     case RESET_APP:
-      return defaultValue;
+      return <%= actionName.reducerName %>Default;
     default:
       return state;
   }
 }
-

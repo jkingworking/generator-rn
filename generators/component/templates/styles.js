@@ -1,4 +1,4 @@
-import styleVariables from '../../styles/styleVariables';
+import styleVariables from 'src/styles/styleVariables';
 
 export default {
   component<%= componentName.pascalCase %>: {},
